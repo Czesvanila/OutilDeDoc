@@ -1,0 +1,106 @@
+{
+    "name": "SN Utils Of Documentation",
+    "short_name": "SN Utils Of Documentation",
+    "description": "L'outil de documentation permet pour un objet ou un ensemble d'objets, de récupérer les informations techniques mis en forme et répondant au standard Engage ESM. La mise en page est modifiable. Le document est vu dans une pop up et il y a possibilité de le télécharger au format de sortie .doc ou .docs ou d’envoyer directement à l’intéressé.",
+    "author": "Leïla RIFFLART",
+    "version": "1.0",
+    "permissions": [
+        "activeTab",
+        "https://*.service-now.com/*",
+        "declarativeContent",
+        "storage",
+        "nativeMessaging",
+        "contextMenus",
+        "management",
+        "cookies"
+    ],
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "background": {
+        "scripts": [
+            "js/jquery.js",
+    
+            "background.js"
+        ],
+        "persistent": true
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.service-now.com/*"
+            ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
+            ],
+            "js": [
+                "content_script_parent.js"
+            ]
+        },
+        {
+            "matches": [
+                "https://*.service-now.com/*"
+            ],
+            "exclude_matches": [
+                "https://signon.service-now.com/*",
+                "https://*.service-now.com/*XML=*"
+            ],
+            "js": [
+                "js/jquery.js",
+                "content_script_all_frames.js"
+            ],
+            "all_frames": true
+        }
+    ],
+    "commands": {
+        "_execute_page_action": {
+            "suggested_key": {
+                "default": "Ctrl+1",
+                "mac": "Command+1"
+            },
+            "description": "Activate Extension"
+        },
+        "pop": {
+            "suggested_key": {
+                "default": "Ctrl+2",
+                "mac": "Command+2"
+            },
+            "description": "Pop-In / Pop-Out"
+        },
+        "show-technical-names": {
+            "suggested_key": {
+                "default": "Ctrl+3",
+                "mac": "Command+3"
+            },
+            "description": "Show Technical Names"
+        },
+        "toggle-scriptsync": {
+            "suggested_key": {
+                "default": "Ctrl+4",
+                "mac": "Command+4"
+            },
+            "description": "Open VS Code ScriptSync tab"
+        }
+    },
+    "page_action": {
+        "default_title": "ServiceNow Utils of Documentation",
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        },
+        "show_matches": ["https://*.service-now.com/*"],
+        "hide_matches": ["https://evedevsecure.service-now.com/*"]
+    },
+    "web_accessible_resources": [
+        "inject.js",
+        "inject_parent.js"
+    ],
+    "manifest_version": 2
+}

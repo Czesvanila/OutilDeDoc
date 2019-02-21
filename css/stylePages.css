@@ -1,0 +1,71 @@
+body {
+    background: rgb(160, 153, 153);
+}
+
+#page {
+    background: white;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 0.5cm;
+    margin-top: 0.5cm;
+    box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+    width: 21cm;
+    height: 29.7cm;
+
+}
+
+.header {
+    width: 21cm;
+    height: 6cm;
+}
+
+#logo1 {
+    width: 4cm;
+    height: auto;
+    border: 0;
+    float: right;
+    margin-right: 8%;
+    margin-top: 5%;
+}
+
+#img1 {
+    width: 21cm;
+    height: auto;
+}
+
+.titre {
+    font-family: serif;
+    color: black;
+    font-style: bold; 
+    font-size: 3em;
+}
+
+.version{
+    font-style: bold; 
+    font-size:5m;
+    color:#ed7d31;
+}
+
+p {
+    margin-right: 8%;
+    margin-left: 8%;
+}
+
+p.text{
+    font-size:1em;
+}
+
+ol.sousTitre {
+    list-style-type: upper;
+
+  }
+
+  #logo2 {
+    width: 4cm;
+    height: auto;
+    border: 0;
+    float: right;
+    margin-right: 8%;
+    margin-top: 5%;
+}
+

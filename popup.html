@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ServiceNow Utils by arnoudkooi.com</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/datatables.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/stylePages.css">
+
+
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.deserialize.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/moment.js"></script>
+    <script src="js/datatables.min.js"></script>
+    <script src="js/datetime-moment.js"></script>
+
+    <script src="popup.js"></script>
+</head>
+
+<body>
+    <div class="page">
+        <!-- Code de la page de garde -->
+        <div id="pageDeGarde">
+            <div class="header">
+                <img id="logo1" src="../images/logo1.jpg" name="logo1">
+            </div>
+            <div class="contenaire">
+                <img id="img1" src="../images/img1.jpg" name="img1">
+                <p class="titre" name="titre">
+                    Centre de Service – Compte rendu
+                </p>
+                <div class="text">
+                    <p>Référence:</p>
+                </div>
+                <div class="version">
+                    <p>Version</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page">
+        <div class="header">
+            <img id="logo2" src="../images/logo2.jpg" name="logo2">
+        </div>
+
+        <!-- Code de la page Information -->
+        <p style=" background: #00b4e4; line-height: 150%; position: center; color: white;font-weight: bold; font-size: 20pt">Informations</p>
+
+        <OL>
+            <Li>
+                <P STYLE="margin-top: 0.25in; margin-bottom: 0.08in; line-height: 100%; font-size: 14pt">
+                    Approbation du document
+                </P>
+        </OL>
+
+        <!-- Tableau circuit d'approbation du document -->
+        <table WIDTH=auto CELLPADDING=7 CELLSPACING=0>
+                <tr>
+                    <td colspan=2 style="background:#01b2e4"><p ALIGN=center style="margin-left: 0.08in; margin-right: 0.08in; margin-top: 0.04in; font-size:20px; color: white">Circuit d’approbation du document</p></td>
+                </tr>
+            
+                <tr>
+                    <th> Rédigé par </th>
+                    <td> Généré la donnée à partir des résultats de la fonction setBrowserVariables(obj) de /popup.js </td>
+
+                </tr>
+                <tr>
+                    <th>Date de rédaction</th>
+                    <td> Généré la donnée à partir des résultats de la fonction setBrowserVariables(obj) de /popup.js </td>
+                </tr>
+                <tr>
+                    <th>Version du document</th>
+                    <td> Remplir sois même apres téléchargement du document </td>
+                </tr>         
+        </table>
+    </div>
+
+
+
+
+
+
+    <div class="page">
+        <form>
+            <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
+            <ul class="nav" id="myTab">
+                <li class='nav-item onlyadmin'>
+                    <a class="list-group-item" data-target="#tabupdatesets" data-toggle="tab"> clique bouton les updateset seront générés
+                    </a>
+                </li>
+            </ul>
+            <div id="listeUpdateSet">
+                <div id="tabupdatesets">
+                    <table id="updatesets" class="list-group-item"></table>
+                </div>
+            </div>
+    </div>
+    
+                <input id='tbxactivetab' name='tbxactivetab' value="tababout" class="sync" type="hidden" />
+                <!-- Génére les données -->
+                <ul class="nav nav-tabs compact" id="myTab">
+                    <li class='nav-item'>
+                        <a class="nav-link" data-target="#tabdataexplore" data-toggle="tab">View Data
+                            <span id="waitingdataexplore" class="waiting">
+                                <i class='fa fa-spinner fa-spin' aria-hidden='true'></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                
+
+    <div class="tab-content">
+
+        <!-- Affiche la liste des updateset -->
+        <div class="tab-pane" id="tabupdatesets">
+            <table id="updatesets" class="display"></table>
+        </div>
+        </form>
+    </div>
+</body>
+
+</html>
+
