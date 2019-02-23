@@ -1,3 +1,6 @@
+/* Ce n'est qu'un prototype. Le code est simple et brouillon mais le width et height sont les vrais 
+mesures d'une page A4 */
+
 body {
     background: rgb(160, 153, 153);
 }
@@ -69,3 +72,9 @@ ol.sousTitre {
     margin-top: 5%;
 }
 
+.textTableau{
+
+    font-size:20pt;
+    width: auto;
+
+}

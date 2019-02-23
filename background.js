@@ -6,7 +6,7 @@ var g_ck;
 var sysId;
 var url;
 var instance;
-var nme;
+var user;
 var jsnNodes;
 var urlFull;
 var updateSetTables = [];
@@ -18,6 +18,11 @@ if (onprem) {
     urlContains = ".";
     urlPattern = "*://*/*";
 }
+
+
+/* Pour mieux comprendre: Documentation du développeur (https://developer.chrome.com/webstore) */
+//Ici on peut voir c'est ce que l'on trouve dans la page en arrière-plan, dans la console
+
 
 //Attatch eventlistener, setting extension only active on matching urls
 chrome.runtime.onInstalled.addListener(function () {
@@ -371,47 +376,6 @@ function sendToggleAtfHelper() {
         });
 }
 
-// function sendToggleSnScriptsync(force) {
-
-//     getFromSyncStorageGlobal("scriptsync-active", function (answer) {
-//         var newValue = !(answer || false);
-
-//         if (force == "enable" || force == "opentabonly") newValue = true;
-//         if (force == "disable") newValue = false;
-
-
-//         setToChromeSyncStorageGlobal("scriptsync-active", newValue);
-
-//         if (force != "opentabonly") {
-//             chrome.tabs.query({
-//                 active: true,
-//                 currentWindow: true
-//             }, function (tabs) {
-//                 chrome.tabs.reload(tabs[0].id);
-//             });
-//         }
-
-//         if (newValue) {
-
-//             getFromSyncStorageGlobal("synctab", function (tid) {
-//                 if (tid) { //bit of a hack to prvent asking tabs permission, jet prevent opening multiple same tabs
-//                     chrome.tabs.get(tid, function () {
-//                         if (chrome.runtime.lastError) {
-//                             createScriptSyncTab();
-//                         } else {
-//                             chrome.tabs.update(tid, {
-//                                 'active': false
-//                             });
-//                         }
-//                     });
-//                 } else
-//                     createScriptSyncTab();
-//             });
-//         }
-//     });
-
-// }
-
 function createScriptSyncTab() {
 
     getFromSyncStorageGlobal("synctab", function (tid) {
@@ -512,30 +476,6 @@ function togglePop(clickData, tid) {
 
 }
 
-function clearCookies(e, tabid, target) {
-
-    var tokens = e.pageUrl.split('/').slice(0, 3);
-    var url = tokens.join('/');
-    var domain = e.pageUrl.split('/')[2];
-    chrome.cookies.getAll({
-        domain: domain
-    }, function (cookies) {
-        for (var i = 0; i < cookies.length; i++) {
-            chrome.cookies.remove({
-                url: url + cookies[i].path,
-                name: cookies[i].name
-            });
-        }
-    });
-    if (target)
-        chrome.tabs.update(tabid, {
-            url: url + target
-        });
-    else
-        chrome.tabs.reload(tabid);
-
-}
-
 
 function openUrl(e, f, u) {
     var tokens = e.pageUrl.split('/').slice(0, 3);
@@ -545,26 +485,6 @@ function openUrl(e, f, u) {
     });
 }
 
-function openSearch(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
-
-    var srch = e.selectionText;
-    if (srch.length < 100)
-        chrome.tabs.create({
-            url: URL + "/textsearch.do?sysparm_search=" + srch
-        });
-}
-
-function openScriptInclude(e) {
-    var tokens = e.pageUrl.split('/').slice(0, 3),
-        URL = tokens.join('/');
-    var srch = e.selectionText;
-    if (srch.length < 40)
-        chrome.tabs.create({
-            url: URL + "/sys_script_include.do?sysparm_refkey=name&sys_id=" + srch
-        });
-}
 
 function openTableList(e) {
     var tokens = e.pageUrl.split('/').slice(0, 3),
@@ -647,7 +567,8 @@ function getBrowserVariables(tid) {
         g_ck = response.myVars.g_ck || '';
         url = response.url;
         instance = (new URL(url)).host.replace(".service-now.com", "");
-        nme = response.myVars.NOWusername || response.myVars.NOWuser_name;
+        //user variable qui représente l'utilisateur connecté
+        user= response.myVars.NOWusername || response.myVars.NOWuser_name;
         popup.setBrowserVariables(response);
     });
 }
@@ -772,35 +693,6 @@ function getGRQueryForm(varName, template) {
 
 }
 
-//Query servicenow for details of user, passhtml string to popup
-function getUserDetails(userName) {
-
-    var myurl = url + "/api/now/table/sys_user?sysparm_display_value=all&sysparm_query=user_name%3D" + userName;
-    loadXMLDoc(g_ck, myurl, null, function (fetchResult) {
-        var listhyperlink = " <a target='_blank' href='" + url + "/sys_user_list.do?sysparm_query=user_nameLIKE" + userName + "%5EORnameLIKE" + userName + "'> <i class='fa fa-list' aria-hidden='true'></i></a>";
-        var html;
-        if (fetchResult.result.length > 0) {
-            var usr = fetchResult.result[0];
-            html = "<br /><table class='table table-condensed table-bordered table-striped'>" +
-                "<tr><th>User details</th><th>" + usr.user_name.display_value + listhyperlink + "</th></tr>" +
-
-                "<tr><td>Name:</td><td><a href='" + url + "/nav_to.do?uri=sys_user.do?sys_id=" +
-                usr.sys_id.display_value + "' target='_user'>" +
-                usr.name.display_value + "</a></td></tr>" +
-                "<tr><td>Active:</td><td>" + usr.active.display_value + "</td></tr>" +
-                "<tr><td>Last login:</td><td>" + usr.last_login_time.display_value + "</td></tr>" +
-                "<tr><td>Created:</td><td>" + usr.sys_created_on.display_value + "</td></tr>" +
-                "<tr><td>Created by:</td><td>" + usr.sys_created_by.display_value + " <a id='createdby' data-username='" + usr.sys_created_by.display_value + "' href='#'> <i class='fa fa-sign-out fa-1' aria-hidden='true'></i></a></td></tr>" +
-                "<tr><td>Phone:</td><td>" + usr.phone.display_value + "</td></tr>" +
-                "<tr><td>E-mail:</td><td><a href='mailto:" + usr.email.display_value + "'>" + usr.email.display_value + "</a></td></tr></table>";
-            popup.setUserDetails(html);
-        } else {
-            html = "<br /><table class='table table-condensed table-bordered table-striped'><tr><th>User details</th><th>" + userName + listhyperlink + "</th></tr>" +
-                "<tr><td>Result:</td><td>No exact match, try clicking the list icon.</td></tr></table>";
-            popup.setUserDetails(html);
-        }
-    });
-}
 
 
 //Query ServiceNow for tables, pass JSON back to popup

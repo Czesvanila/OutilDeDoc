@@ -27,6 +27,9 @@ var snufsid = 'gfmcfepahcbpafgckmomdopifchjbdcg';// prod
 var snufsrunning = false;
 
 
+//Les premieres fonctions servent à communiquer avec la fenêtre ouverte dans le navigateur
+//voir la documentation du développeur
+
 document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         tabid = tabs[0].id;
@@ -230,24 +233,7 @@ function setBrowserVariables(obj) {
     $('#btncreatefiles').click(function () {
         sendToSnuFileSync();
     });
-    $('#tbxname').keypress(function (e) {
-        if (e.which == '13') {
-            e.preventDefault();
-            getUserDetails(false);
-        }
-    });
-    $('#btnrefreshtables').click(function () {
-        $('#waitingtables').show();
-        bgPage.getScriptFields();
-        bgPage.getTables();
-    });
-    $('#btnSendXplore').click(function () {
-        var script = $('#txtgrquery').val();
-        var win = chrome.tabs.create({ "url" : url + "/snd_xplore.do"  , "active" : !(event.ctrlKey||event.metaKey) }); //window.open('');
-        jQuery(win).bind('load', function(){
-            win.snd_xplore_editor.setValue(script);
-        });
-    });
+  
 
     $.fn.dataTable.moment('DD-MM-YYYY HH:mm:ss');
     $.fn.dataTable.moment(datetimeformat);
@@ -399,7 +385,6 @@ function sendToSnuFileSync() {
 
 }
 
-
 //Initiate Call to servicenow rest api
 function getUserDetails(usr) {
     if (!usr) usr = $('#tbxname').val();
@@ -408,78 +393,48 @@ function getUserDetails(usr) {
     bgPage.getUserDetails(usr);
 }
 
-//Set the user details table
-function setUserDetails(html) {
-    $('#rspns').html(html);
-
-    if ($('#createdby').length > 0) {
-        $('.nav-tabs a[data-target="#tabuser"]').tab('show');
-        $('#createdby').click(function () {
-            var usr = $(this).data('username');
-            $('#tbxname').val(usr).focus(function () {
-                $(this).select();
-            });
-
-            bgPage.getUserDetails(usr);
-        });
-    }
-    else
-        $('#tbxname').val('');
-
-    $('#waitinguser').hide();
-}
-
 
 
 // Définir ou actualiser les données avec les mises à jour ServiceNow
-function setDataTableUpdateSets(nme) {
+//Avec en paramètre une variable user qui représente l'utilisateur
+//Voir fonction getBrowserVariables() dans fichier background.js
 
-    if (nme == 'error'){
+function setDataTableUpdateSets(user) {
+
+    //L'utilisateur (user) n'est pas connécté
+    //Liste update set n'est pas généré et affiche erreur
+    if (user == 'error'){
         $('#updatesets').hide().after('<br /><div class="alert alert-danger">Data can not be retrieved, are you Admin?</div>');
         $('#waitingupdatesets').hide();
         return false;
     }
-  
+    
+    //Récupère les updatesets et les affiche avec leurs états dans la div ou on appel l'id updatesets
     if (dtUpdateSets) dtUpdateSets.destroy();
     dtUpdateSets = $('#updatesets').DataTable({
-        "aaData": nme.result.updateSet,
+        "aaData": user.result.updateSet,
         "aoColumns": [
             { "mDataProp": "name" },
+
+        
+            //Donne l'état de l'update set
             {
                 mRender: function (data, type, row) {
                     var iscurrent = "";
-                    if (row.sysId == nme.result.current.sysId) iscurrent = "iscurrent";
-                    return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
+                    if (row.sysId == user.result.current.sysId) iscurrent = "iscurrent";
+                    return "<a class='updatesetlist' href='" + url + "/nav_to.do?uri=sys_update_set.do?sys_id=" + row.sysId + "' title='Table definition' ><i class='fa fa-list' aria-hidden='true'></i></a> " +
                         "<a class='setcurrent " + iscurrent + "' data-post='{name: \"" + row.name + "\", sysId: \"" + row.sysId + "\"}' href='#" + row.sysId + "' title='Set current updateset'><i class='fa fa-dot-circle-o' aria-hidden='true'></i></a> ";
                 }
             }
         ],
-        //Faire le
         "drawCallback": function () {
             var row0 = $("#updatesets tbody tr a.iscurrent").closest('tr').clone();
-            $('#updatesets tbody tr:first').before(row0.css('background-color', 'white'));
+            $('#updatesets tbody tr:first').before(row0.css('background-color', '#5ebeff'));
         },
         
-        "bLengthChange": false,
-        "bSortClasses": false,
         "paging": false
     });
-    
-
-    $('#tbxupdatesets').keyup(function () {
-        dtUpdateSets.search($(this).val()).draw();
-    }).focus().trigger('keyup');
-
-    $('a.updatesetlist').click(function () {
-        event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
-    });
-
-    $('a.setcurrent').click(function () {
-        $('#waitingupdatesets').show();
-        bgPage.setUpdateSet($(this).data('post'));
-    });
-
+  
     $('#waitingupdatesets').hide();
 
 }
@@ -494,70 +449,15 @@ function setTables(jsn) {
 
 
 //set or refresh datatable with ServiceNow tables
-function setDataTableTables(nme) {
-
-    if (dtTables) dtTables.destroy();
-
-    dtTables = $('#tbls').DataTable({
-        "aaData": nme,
-        "aoColumns": [
-            { "mDataProp": "label" },
-            { "mDataProp": "name" },
-            {
-                mRender: function (data, type, row) {
-                    return "<a class='tabletargetlist' href='" + url + '/' + row.name + "_list.do' title='Go to List (Using query selected below)' ><i class='fa fa-table' aria-hidden='true'></i></a> " +
-                        "<a class='tabletarget' href='" + url + "/nav_to.do?uri=sys_db_object.do?sys_id=" + row.name + "%26sysparm_refkey=name' title='Go to table definition' ><i class='fa fa-cog' aria-hidden='true'></i></a> " +
-                        "<a class='tabletarget' href='" + url + "/generic_hierarchy_erd.do?sysparm_attributes=table_history=,table=" + row.name + ",show_internal=true,show_referenced=true,show_referenced_by=true,show_extended=true,show_extended_by=true,table_expansion=,spacing_x=60,spacing_y=90,nocontext' title='Show Schema Map'><i class='fa fa-sitemap' aria-hidden='true'></i></a>";
-                }
-            }
-        ],
-        "bLengthChange": false,
-        "bSortClasses": false,
-        "paging": false,
-        "dom": 'rti<"btns"B>',
-        "buttons": [
-        "copyHtml5"
-        ]
-
-    });
-
-    $('a.tabletargetlist').click(function () {
-        event.preventDefault();
-        var url = $(this).attr('href') + "?sysparm_query=" + $('#slctlistquery').val();
-        if (url.indexOf("syslog") > 1){
-            url = url.replace(/sys_updated_on/g, 'sys_created_on'); //syslog tables have no updated columnn.
-        }
-        chrome.tabs.create({ "url" : url  , "active" : !(event.ctrlKey||event.metaKey) });
-    });
-
-    $('a.tabletarget').click(function () {
-        event.preventDefault();
-        chrome.tabs.create({ "url" : $(this).attr('href')  , "active" : !(event.ctrlKey||event.metaKey) });
-    });
-
-    $('#tbxtables').keyup(function () {
-        dtTables.search($(this).val()).draw();
-    }).focus().trigger('keyup');
-
-
-    $('#waitingtables').hide();
-}
-
-
-
-//set or refresh datatable with ServiceNow tables
-function setDataExplore(nme) {
+function setDataExplore(user) {
 
     if (dtDataExplore) dtTables.destroy();
-//$('#dataexplore').html(nme);
+//$('#dataexplore').html(user);
     dtDataExplore = $('#dataexplore').DataTable({
-        "aaData": nme,
+        "aaData": user,
         "aoColumns": [
 
             { "mDataProp": "meta.label"},
-            { "mDataProp": "name"},
-            { "mDataProp": "meta.type"},
-            { "mDataProp": "value"},
             { "mDataProp": "display_value"}
         ],
         "bLengthChange": false,
